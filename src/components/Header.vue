@@ -3,7 +3,7 @@
     <div class="header">
       <i slot="icon" class="iconfont header-left">&#xe615;</i>
       <p>IMUSIC</p>
-      <i slot="icon" class="iconfont header-right">&#xe611;</i>
+      <i slot="icon" class="iconfont header-right" @click="songItemTrue()">&#xe611;</i>
     </div>
   </div>
 </template>
@@ -13,6 +13,11 @@ export default {
   name: "Header",
   data() {
     return {};
+  },
+  methods: {
+    songItemTrue() {
+      this.$store.commit("setIsPlay", true);
+    }
   }
 };
 </script>
@@ -20,17 +25,13 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .header-container {
-  background: #5c258d; /* fallback for old browsers */
+ background: #5c258d; /* fallback for old browsers */
   background: -webkit-linear-gradient(
-    to right,
+    -45deg,
     #4389a2,
-    #5c258d
+    #8f45cf
   ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(
-    to right,
-    #4389a2,
-    #5c258d
-  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(-45deg, #4389a2, #8f45cf);
 }
 
 .container-bottom {

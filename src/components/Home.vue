@@ -13,24 +13,22 @@
     </div>
     <!-- 排行榜 -->
     <ul>
-      <vuescroll>
-        <!--li数据遍历循环部分-->
-        <li class="list" v-for="(item,index) in list" :key="index" @click="listItemTrue(item.id)">
-          <div class="list-left">
-            <img :src="item.coverImgUrl" alt>
-          </div>
-          <div class="list-center">
-            <p v-for="(songName,index) in item.tracks" :key="index" v-show="item.tracks.length">
-              <span>NO.{{index+1}}</span>
-              {{songName.first}}-{{songName.second}}
-            </p>
-            <span v-show="!item.tracks.length">{{item.name}}</span>
-          </div>
-          <div class="list-right">
-            <i class="iconfont">&#xe733;</i>
-          </div>
-        </li>
-      </vuescroll>
+      <!--li数据遍历循环部分-->
+      <li class="list" v-for="(item,index) in list" :key="index" @click="listItemTrue(item.id)">
+        <div class="list-left">
+          <img :src="item.coverImgUrl" alt>
+        </div>
+        <div class="list-center">
+          <p v-for="(songName,index) in item.tracks" :key="index" v-show="item.tracks.length">
+            <span>NO.{{index+1}}</span>
+            {{songName.first}}-{{songName.second}}
+          </p>
+          <span v-show="!item.tracks.length">{{item.name}}</span>
+        </div>
+        <div class="list-right">
+          <i class="iconfont">&#xe733;</i>
+        </div>
+      </li>
     </ul>
     <!-- 榜单歌曲 -->
     <div class="listItem" v-show="listShow">
@@ -42,48 +40,55 @@
       <div class="listItem-center">
         <ul>
           <vuescroll>
-            <li v-for="(item,index) in listItem" :key="index" @click="songItemTrue(item.id)">
-              <div class="spanBox">
-                <span>{{index +1}}</span>
+            <li class="playAll" @click="playerListFn('all')">
+              <span>全部播放</span>
+            </li>
+            <li v-for="(item,index) in listItem" :key="index">
+              <div @click="songItemTrue(item.id,item.al.picUrl)" class="listBox">
+                <div class="spanBox">
+                  <span>{{index +1}}</span>
+                </div>
+                <div class="img">
+                  <img :src="item.al.picUrl" alt>
+                </div>
+                <div class="spanBoxs">
+                  <span>{{item.name}}</span>
+                </div>
               </div>
-              <div class="img">
-                <img :src="item.al.picUrl" alt>
-              </div>
-              <div class="spanBoxs">
-                <span>{{item.name}}</span>
+
+              <div
+                class="add"
+                @click="playerListFn('one',item.name,item.al.picUrl,item.id,item.ar[0].name)"
+              >
+                <i class="iconfont" v-show="!Collection">&#xe669;</i>
               </div>
             </li>
           </vuescroll>
         </ul>
       </div>
     </div>
-    <!-- 播放 -->
-    <div :class="isPlay ? 'z-index200' : 'z-index-1'">
-      <div class="player-header">
-        <div class="back" @click="songItemFalse()">
-          <i class="iconfont">&#xe724;</i>
-        </div>
-        <audio :src="musicSrc" controls></audio>
-      </div>
-    </div>
-    <!-- 加载动画 -->
-    <div class="loading" v-show="lsLoading">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
+    <!-- 播放器组件 -->
+    <player :class="IsPlay ? 'deviation-0' : 'deviation-540'" :audioUrl="audioUrl"></player>
+    <!-- 加载动画组件 -->
+    <MaskLayer v-show="IsMaskLayer"></MaskLayer>
   </div>
 </template>
 
 <script>
+// 滑动插件
 import vuescroll from "vuescroll";
+// 加载页面
+import MaskLayer from "./MaskLayer.vue";
+// 播放组件
+import player from "./player.vue";
+
 export default {
   name: "Home",
   data() {
     return {
+      // 24个排行榜的数据
       list: [],
+      // 由于获取排行榜数据的key是idx，网上获取不到，自己定义的id对于idx
       listID: [
         {
           name: "云音乐新歌榜",
@@ -206,73 +211,245 @@ export default {
           idx: 23
         }
       ],
+      // 具体榜单的歌曲
       listItem: [],
+      // 存储榜单数据
+      listObj: {},
+      // 具体排行榜的背景图地址
       bgImg: null,
-      lsLoading: false,
-      isPlay: false,
-      musicSrc: null
+      // 传给player组件的值(播放时的音乐地址和图片)
+      audioUrl: {
+        musicSrc: null,
+        musicImgUrl: null
+      },
+      // 收藏判断
+      Collection: false,
+      // 播放歌单的每一项的模板
+      playerListItem: {
+        songName: null,
+        songer: null,
+        songID: null,
+        songImg: null
+      }
     };
   },
   mounted() {
-    this.isPlay = true;
+    // 获取24个排行榜
     fetch(" https://imusic-api.herokuapp.com/toplist/detail")
       .then(res => {
         return res.json();
       })
       .then(data => {
-        this.isPlay = false;
-        this.list = this.list.concat(data.list);
+        for (let i = 0; i < 4; i++) {
+          const element = data.list[i];
+          this.list.push(element);
+        }
       });
   },
   methods: {
+    // 具体排行榜的数据获取
     listItemTrue(id) {
+      // 初始化
       this.bgImg = null;
       this.listItem = [];
-      this.lsLoading = true;
+      // 加载动画
       this.$store.commit("setListShow", true);
-      this.listID.forEach(element => {
-        if (element.id === id) {
-          console.log("id确定成功，正在过去数据");
-          fetch(`https://imusic-api.herokuapp.com/top/list?idx=` + element.idx)
-            .then(res => {
-              return res.json();
-            })
-            .then(data => {
-              console.log("数据获取成功！");
-              this.lsLoading = false;
-              this.bgImg = data.playlist.coverImgUrl;
-              this.listItem = this.listItem.concat(data.playlist.tracks);
-            });
-        }
-      });
+      this.$store.commit("setIsMaskLayer", true);
+      this.$store.commit("setIsLoading", true);
+      // 本地是否储存了数据 true: 获取本地数据 false:获取网上数据
+      if (this.listObj.hasOwnProperty(id)) {
+        console.log("本地数据获取成功，正在调用");
+        // 本地数据赋值
+        this.listItem = this.listItem.concat(this.listObj[id]);
+        this.bgImg = this.listObj[id].bgImg;
+        // 加载动画结束
+        this.$store.commit("setIsLoading", false);
+        this.$store.commit("setIsMaskLayer", false);
+      } else {
+        console.log("数据获取成功！");
+        // 遍历自定义的id与idx的对应
+        this.listID.forEach(element => {
+          // 如果传入的id找到与之匹配的id，通过idx获取数据
+          if (element.id === id) {
+            console.log("id确定成功，正在获取数据");
+            fetch(
+              `https://imusic-api.herokuapp.com/top/list?idx=` + element.idx
+            )
+              .then(res => {
+                return res.json();
+              })
+              .then(data => {
+                console.log("数据获取成功！");
+                // 数据赋值
+                this.bgImg = data.playlist.coverImgUrl;
+                this.listItem = this.listItem.concat(data.playlist.tracks);
+                // 数据保存到本地
+                this.listObj[element.id] = data.playlist.tracks;
+                this.listObj[element.id].bgImg = data.playlist.coverImgUrl;
+                // 加载动画结束
+                this.$store.commit("setIsLoading", false);
+                this.$store.commit("setIsMaskLayer", false);
+              });
+          }
+        });
+      }
     },
+    // 离开排行榜
     listItemFalse() {
       this.$store.commit("setListShow", false);
     },
-    songItemTrue(id) {
-      console.log(id);
-      this.isPlay = true;
-      this.lsLoading = true;
-      this.musicSrc = null;
-      fetch(`https://imusic-api.herokuapp.com/song/url?id=` + id)
+    // 获取歌曲的url，接收传入的背景图url
+    songItemTrue(id, url) {
+      // 加载动画
+      this.$store.commit("setIsPlay", true);
+      this.$store.commit("setIsLoading", true);
+      this.$store.commit("setIsMaskLayer", true);
+      // 初始化
+      this.audioUrl.musicSrc = null;
+      this.audioUrl.musicImgUrl = url;
+      // 通过传过来的id判断是否具有版权
+      fetch(`https://imusic-api.herokuapp.com/check/music?id=` + id)
         .then(res => {
           return res.json();
         })
         .then(data => {
-          this.lsLoading = false;
-          this.musicSrc = data.data[0].url;
+          // 如果具有版权
+          if (data.success == true) {
+            // 获取歌曲信息
+            fetch(`https://imusic-api.herokuapp.com/song/url?id=` + id)
+              .then(res => {
+                return res.json();
+              })
+              .then(data => {
+                // 保存歌曲信息
+                this.audioUrl.musicSrc = data.data[0].url;
+                // 加载动画结束
+                this.$store.commit("setIsLoading", false);
+                this.$store.commit("setIsMaskLayer", false);
+                console.log("数据获取成功，点击播放");
+              });
+          }
+          // 获取没有版权
+          else if (data.success == false) {
+            // 加载动画结束，告知没有版权
+            this.$store.commit("setIsLoading", false);
+            this.$store.commit("setIsCopyright", true);
+            // 告知动画结束
+            setTimeout(() => {
+              this.$store.commit("setIsCopyright", false);
+              this.$store.commit("setIsMaskLayer", false);
+            }, 1000);
+          }
         });
     },
+    // 离开播放页面
     songItemFalse() {
-      this.isPlay = false;
+      this.$store.commit("setIsPlay", false);
+    },
+    // 构建播放列表
+    playerListFn(result, songName, songImg, songID, songer) {
+      switch (result) {
+        case "all":
+          console.log("添加所以歌曲");
+          break;
+        case "one":
+          console.log("添加一首歌曲");
+          if (this.playerList.length == 0) {
+            this.playerListItem.songName = songName;
+            this.playerListItem.songImg = songImg;
+            this.playerListItem.songID = songID;
+            this.playerListItem.songer = songer;
+            fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+              method: "post",
+              body: JSON.stringify(this.playerListItem),
+              headers: {
+                "content-type": "application/json"
+              }
+            }).then(res => {
+              this.getPlayerList();
+            });
+            this.$store.commit("setAddedSuccessfully", true);
+            this.$store.commit("setIsMaskLayer", true);
+            // 告知动画结束
+            setTimeout(() => {
+              this.$store.commit("setAddedSuccessfully", false);
+              this.$store.commit("setIsMaskLayer", false);
+            }, 500);
+          } else {
+            var inspect = false;
+            this.playerList.forEach(element => {
+              if (element.songID == songID) {
+                console.log("这首歌已经在列表");
+              } else {
+                inspect = true;
+              }
+            });
+
+            if (inspect) {
+              this.playerListItem.songName = songName;
+              this.playerListItem.songImg = songImg;
+              this.playerListItem.songID = songID;
+              this.playerListItem.songer = songer;
+              fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+                method: "post",
+                body: JSON.stringify(this.playerListItem),
+                headers: {
+                  "content-type": "application/json"
+                }
+              }).then(res => {
+                this.getPlayerList();
+              });
+              this.$store.commit("setAddedSuccessfully", true);
+              this.$store.commit("setIsMaskLayer", true);
+              // 告知动画结束
+              setTimeout(() => {
+                this.$store.commit("setAddedSuccessfully", false);
+                this.$store.commit("setIsMaskLayer", false);
+              }, 500);
+            }
+          }
+          console.log(this.playerList.length == 0);
+          break;
+        default:
+          break;
+      }
+    },
+    // 获取列表数据
+    getPlayerList() {
+      fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json")
+        .then(res => {
+          return res.json();
+        })
+        .then(data => {
+          var playList = [];
+          for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+              const element = data[key];
+              data[key].idx = key;
+              playList.push(element);
+            }
+          }
+          this.$store.commit("setPlayerList", playList);
+        });
     }
   },
   components: {
-    vuescroll
+    vuescroll,
+    MaskLayer,
+    player
   },
   computed: {
     listShow() {
       return this.$store.state.listShow;
+    },
+    IsMaskLayer() {
+      return this.$store.state.IsMaskLayer;
+    },
+    IsPlay() {
+      return this.$store.state.IsPlay;
+    },
+    playerList() {
+      return this.$store.state.playerList;
     }
   }
 };
@@ -283,15 +460,11 @@ export default {
 .home-container {
   background: #5c258d; /* fallback for old browsers */
   background: -webkit-linear-gradient(
-    to right,
+    -45deg,
     #4389a2,
-    #5c258d
+    #8f45cf
   ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(
-    to right,
-    #4389a2,
-    #5c258d
-  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(-45deg, #4389a2, #8f45cf);
 }
 
 .motto {
@@ -333,7 +506,7 @@ export default {
 
 .list {
   text-align: center;
-  height: 150px;
+  height: 120px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -400,6 +573,7 @@ export default {
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
+  background-color: #ccc;
 }
 
 .listItem .listItem-top .back {
@@ -414,49 +588,6 @@ export default {
   margin-left: 20px;
 }
 
-.loading {
-  width: 80px;
-  height: 40px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  margin-top: -20px;
-  margin-left: -40px;
-  z-index: 999;
-}
-.loading span {
-  display: inline-block;
-  width: 8px;
-  height: 100%;
-  border-radius: 4px;
-  background: lightgreen;
-  -webkit-animation: load 1s ease infinite;
-}
-@-webkit-keyframes load {
-  0%,
-  100% {
-    height: 40px;
-    background: lightgreen;
-  }
-  50% {
-    height: 70px;
-    margin: -15px 0;
-    background: lightblue;
-  }
-}
-.loading span:nth-child(2) {
-  -webkit-animation-delay: 0.2s;
-}
-.loading span:nth-child(3) {
-  -webkit-animation-delay: 0.4s;
-}
-.loading span:nth-child(4) {
-  -webkit-animation-delay: 0.6s;
-}
-.loading span:nth-child(5) {
-  -webkit-animation-delay: 0.8s;
-}
-
 .listItem-center {
   width: 540px;
   overflow: hidden;
@@ -468,6 +599,16 @@ export default {
   display: flex;
   align-items: center;
 }
+
+.listItem-center ul .playAll {
+  margin-left: 40px;
+}
+
+.listItem-center ul li .listBox {
+  display: flex;
+  align-items: center;
+}
+
 .listItem-center ul li .spanBox {
   width: 100px;
   height: 100px;
@@ -477,13 +618,20 @@ export default {
   align-items: center;
 }
 .listItem-center ul li .spanBoxs {
-  width: 300px;
+  width: 280px;
   height: 100px;
   float: left;
   display: flex;
   align-items: center;
   margin-left: 40px;
 }
+
+.listItem-center ul li .add {
+  margin-right: 20px;
+  color: #4389a2;
+  font-size: 18px;
+}
+
 .listItem-center ul li span {
   font-size: 18px;
   font-weight: bolder;
@@ -500,32 +648,5 @@ export default {
 .listItem-center ul li .img img {
   width: 100%;
   height: 100%;
-}
-
-.z-index-1 {
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
-.z-index200 {
-  width: 100%;
-  height: 100%;
-  z-index: 200;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: #fff;
-}
-
-.player-header {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  margin-left: 20px;
 }
 </style>
