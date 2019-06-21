@@ -3,7 +3,7 @@
     <div class="header">
       <i slot="icon" class="iconfont header-left">&#xe615;</i>
       <p>IMUSIC</p>
-      <i slot="icon" class="iconfont header-right" @click="songItemTrue()">&#xe611;</i>
+      <i slot="icon" class="iconfont header-right" @click="songItemTrue()">&#xe61c;</i>
     </div>
   </div>
 </template>
@@ -12,7 +12,8 @@
 export default {
   name: "Header",
   data() {
-    return {};
+    return {
+    };
   },
   methods: {
     songItemTrue() {

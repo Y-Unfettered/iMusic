@@ -24,7 +24,16 @@
         <!-- 歌曲图 -->
         <div class="player-img" :style="{backgroundImage: 'url(' + audioUrl.musicImgUrl + ')'}"></div>
         <!-- 歌词 -->
-        <div class="player-lrc"></div>
+        <div class="player-lrc">
+          <ul class="playerLrcRoll">
+            <li
+              class="playerLrcRollLi"
+              v-for="(item,index) in audio.lrc"
+              :key="index"
+              :data-time="item.t"
+            >{{item.c}}</li>
+          </ul>
+        </div>
       </div>
       <!-- 播放页面尾部 -->
       <div class="player-footer">
@@ -109,6 +118,8 @@ export default {
     return {
       // 播放器的默认配置
       audio: {
+        // 播放的歌曲index
+        index:0,
         // 进度条百分比
         sliderTime: 0,
         // 实时播放时间
@@ -124,7 +135,9 @@ export default {
         // 默认播放模式 顺序播放
         order: "loop",
         // 播放列表 默认不显示
-        listShow: false
+        listShow: false,
+        // 歌词
+        lrc: []
       },
       // 播放icon 默认不显示
       playicon: -1
@@ -161,6 +174,7 @@ export default {
       );
       this.audio.sliderTime =
         parseFloat(this.audio.currentTime / this.audio.maxTime) * 100 + "";
+      this.songLrcRoll(this.audio.currentTime);
     },
     // audio的事件 音乐的缓冲完成返回
     onLoadedmetadata(res) {
@@ -200,8 +214,7 @@ export default {
     },
     // 对进度条进行时间控制，自动滑动
     setValue(e) {
-      const value =
-        ((e.clientX - 20) / 500) * 100;
+      const value = ((e.clientX - 20) / 500) * 100;
       if (value <= 0) {
         this.audio.sliderTime = 0;
       } else if (value >= 100) {
@@ -332,6 +345,7 @@ export default {
               .then(data => {
                 // 保存歌曲信息
                 this.audioUrl.musicSrc = data.data[0].url;
+                this.songLrc(id);
                 // 加载动画结束
                 this.$store.commit("setIsLoading", false);
                 this.$store.commit("setIsMaskLayer", false);
@@ -402,7 +416,7 @@ export default {
           this.audio.index = Math.floor(
             Math.random() * (this.playerList.length + 1)
           );
-          console.log(this.playerList[this.audio.index].songID)
+          console.log(this.playerList[this.audio.index].songID);
           this.playTheSong(
             this.audio.index,
             this.playerList[this.audio.index].songID,
@@ -413,6 +427,77 @@ export default {
           break;
       }
       console.log("下一曲");
+    },
+    // 歌词获取并处理
+    songLrc(id) {
+      fetch(`https://imusic-api.herokuapp.com/lyric?id=` + id)
+        .then(res => {
+          return res.json();
+        })
+        .then(data => {
+          var lrc = data.lrc.lyric;
+          let oLRC = {
+            ti: "", //歌曲名
+            ms: [] //歌词数组{t:时间,c:歌词}
+          };
+          let lrcs = lrc.split("\n"); //用回车拆分成数组
+          for (let i in lrcs) {
+            //遍历歌词数组
+            lrcs[i] = lrcs[i].replace(/(^\s*)|(\s*$)/g, ""); //去除前后空格
+            let t = lrcs[i].substring(
+              lrcs[i].indexOf("[") + 1,
+              lrcs[i].indexOf("]")
+            ); //取[]间的内容
+            let s = t.split(":"); //分离:前后文字
+            if (isNaN(parseInt(s[0]))) {
+              //不是数值
+              for (let i in oLRC) {
+                if (i != "ms" && i == s[0].toLowerCase()) {
+                  oLRC[i] = s[1];
+                }
+              }
+            } else {
+              //是数值
+              let arr = lrcs[i].match(/\[(\d+:.+?)\]/g); //提取时间字段，可能有多个
+              let start = 0;
+              for (let k in arr) {
+                start += arr[k].length; //计算歌词位置
+              }
+              let content = lrcs[i].substring(start); //获取歌词内容
+              for (let k in arr) {
+                let t = arr[k].substring(1, arr[k].length - 1); //取[]间的内容
+                let s = t.split(":"); //分离:前后文字
+                oLRC.ms.push({
+                  //对象{t:时间,c:歌词}加入ms数组
+                  t: (parseFloat(s[0]) * 60 + parseFloat(s[1])).toFixed(3),
+                  c: content
+                });
+              }
+            }
+          }
+          oLRC.ms.sort(function(a, b) {
+            //按时间顺序排序
+            return a.t - b.t;
+          });
+          this.audio.lrc = [];
+          this.audio.lrc = this.audio.lrc.concat(oLRC.ms);
+        });
+    },
+    // 歌词滚动
+    songLrcRoll(currentTime) {
+      for (const i in this.audio.lrc) {
+        if (parseInt(this.audio.lrc[i].t) == parseInt(currentTime)) {
+          var playerLrcRoll = document.getElementsByClassName(
+            "playerLrcRoll"
+          )[0];
+          var liList = document.getElementsByClassName("playerLrcRollLi");
+          playerLrcRoll.style.top = i * -60 + 60 + "px";
+          if (i >= 1) {
+            liList[i - 1].classList.remove("Highlight");
+          }
+          liList[i].classList.add("Highlight");
+        }
+      }
     }
   },
   components: {
@@ -499,7 +584,21 @@ export default {
   top: 440px;
   left: 50%;
   margin-left: -250px;
-  background-color: #ccc;
+  overflow: hidden;
+}
+
+.player-center .player-lrc .playerLrcRoll {
+  width: 100%;
+  margin-top: 10px;
+  position: absolute;
+  top: 60px;
+}
+
+.player-center .player-lrc .playerLrcRoll li {
+  width: 100%;
+  height: 60px;
+  text-align: center;
+  line-height: 60px;
 }
 
 .player-footer {
@@ -621,11 +720,11 @@ export default {
   ); /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(-45deg, #4389a2, #8f45cf);
   color: #fff;
+  overflow: hidden; 
 }
 
 .player-list ul {
   height: 419px;
-  overflow: hidden;
 }
 
 .player-list ul li {
@@ -713,12 +812,16 @@ export default {
   }
 }
 .player-list ul li i {
-  margin-right: 20px;
+  margin-right: 40px;
 }
 .active {
   display: block;
 }
 .none {
   display: none;
+}
+.Highlight {
+  font-size: 20px;
+  font-weight: bolder;
 }
 </style>

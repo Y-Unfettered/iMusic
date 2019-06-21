@@ -57,14 +57,14 @@ export default {
 .mask .Popup {
   width: 200px;
   height: 100px;
-  background-color: #000;
+  background-color: #ccc;
   border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .loading {
-  width: 80px;
+  width: 60px;
   height: 40px;
   position: fixed;
   top: 50%;
@@ -78,32 +78,32 @@ export default {
   width: 8px;
   height: 100%;
   border-radius: 4px;
-  background: lightgreen;
-  -webkit-animation: load 1s ease infinite;
+  background: #4389a2;
+  animation: load 1s ease infinite;
 }
-@-webkit-keyframes load {
+@keyframes load {
   0%,
   100% {
     height: 40px;
-    background: lightgreen;
+    background: #4389a2;
   }
   50% {
     height: 70px;
     margin: -15px 0;
-    background: lightblue;
+    background: #8f45cf;
   }
 }
 .loading span:nth-child(2) {
-  -webkit-animation-delay: 0.2s;
+  animation-delay: 0.2s;
 }
 .loading span:nth-child(3) {
-  -webkit-animation-delay: 0.4s;
+  animation-delay: 0.4s;
 }
 .loading span:nth-child(4) {
-  -webkit-animation-delay: 0.6s;
+  animation-delay: 0.6s;
 }
 .loading span:nth-child(5) {
-  -webkit-animation-delay: 0.8s;
+  animation-delay: 0.8s;
 }
 
 .Tips {

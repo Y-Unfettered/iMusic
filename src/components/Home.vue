@@ -44,7 +44,10 @@
               <span>全部播放</span>
             </li>
             <li v-for="(item,index) in listItem" :key="index">
-              <div @click="songItemTrue(item.id,item.al.picUrl)" class="listBox">
+              <div
+                @click="songItemTrue(item.name,item.al.picUrl,item.id,item.ar[0].name)"
+                class="listBox"
+              >
                 <div class="spanBox">
                   <span>{{index +1}}</span>
                 </div>
@@ -56,10 +59,7 @@
                 </div>
               </div>
 
-              <div
-                class="add"
-                @click="playerListFn('one',item.name,item.al.picUrl,item.id,item.ar[0].name)"
-              >
+              <div class="add" @click="playerListFn('one',item.name,item.al.picUrl,item.id,)">
                 <i class="iconfont" v-show="!Collection">&#xe669;</i>
               </div>
             </li>
@@ -68,7 +68,7 @@
       </div>
     </div>
     <!-- 播放器组件 -->
-    <player :class="IsPlay ? 'deviation-0' : 'deviation-540'" :audioUrl="audioUrl"></player>
+    <player ref="player" :class="IsPlay ? 'deviation-0' : 'deviation-540'" :audioUrl="audioUrl"></player>
     <!-- 加载动画组件 -->
     <MaskLayer v-show="IsMaskLayer"></MaskLayer>
   </div>
@@ -235,7 +235,7 @@ export default {
   },
   mounted() {
     // 获取24个排行榜
-    fetch(" https://imusic-api.herokuapp.com/toplist/detail")
+    fetch("https://imusic-api.herokuapp.com/toplist/detail")
       .then(res => {
         return res.json();
       })
@@ -298,49 +298,65 @@ export default {
     listItemFalse() {
       this.$store.commit("setListShow", false);
     },
-    // 获取歌曲的url，接收传入的背景图url
-    songItemTrue(id, url) {
-      // 加载动画
-      this.$store.commit("setIsPlay", true);
-      this.$store.commit("setIsLoading", true);
-      this.$store.commit("setIsMaskLayer", true);
-      // 初始化
-      this.audioUrl.musicSrc = null;
-      this.audioUrl.musicImgUrl = url;
-      // 通过传过来的id判断是否具有版权
-      fetch(`https://imusic-api.herokuapp.com/check/music?id=` + id)
-        .then(res => {
-          return res.json();
-        })
-        .then(data => {
-          // 如果具有版权
-          if (data.success == true) {
-            // 获取歌曲信息
-            fetch(`https://imusic-api.herokuapp.com/song/url?id=` + id)
-              .then(res => {
-                return res.json();
-              })
-              .then(data => {
-                // 保存歌曲信息
-                this.audioUrl.musicSrc = data.data[0].url;
-                // 加载动画结束
-                this.$store.commit("setIsLoading", false);
-                this.$store.commit("setIsMaskLayer", false);
-                console.log("数据获取成功，点击播放");
-              });
+    // 获取歌曲的id，接收传入的背景图url
+    songItemTrue(songName, songImg, songID, songer) {
+      console.log(this.playerList.length == 0);
+      if (this.playerList.length == 0) {
+        this.playerListItem.songName = songName;
+        this.playerListItem.songImg = songImg;
+        this.playerListItem.songID = songID;
+        this.playerListItem.songer = songer;
+        fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+          method: "post",
+          body: JSON.stringify(this.playerListItem),
+          headers: {
+            "content-type": "application/json"
           }
-          // 获取没有版权
-          else if (data.success == false) {
-            // 加载动画结束，告知没有版权
-            this.$store.commit("setIsLoading", false);
-            this.$store.commit("setIsCopyright", true);
-            // 告知动画结束
-            setTimeout(() => {
-              this.$store.commit("setIsCopyright", false);
-              this.$store.commit("setIsMaskLayer", false);
-            }, 1000);
-          }
+        }).then(res => {
+          this.$refs.player.getPlayerList();
         });
+        // 播放这首歌
+        console.log(this.$refs.player);
+        this.$refs.player.playTheSong(0, element.songID, songImg);
+        this.$store.commit("setIsPlay", true);
+      } else {
+        var inspect = true;
+        for (let i = 0; i < this.playerList.length; i++) {
+          const element = this.playerList[i];
+          if (element.songID == songID) {
+            console.log("这首歌已经在列表");
+            // 播放这首歌
+            this.$refs.player.playTheSong(i, element.songID, songImg);
+            this.$store.commit("setIsPlay", true);
+            inspect = false;
+          }
+        }
+
+        if (inspect) {
+          console.log("没添加过");
+          this.playerListItem.songName = songName;
+          this.playerListItem.songImg = songImg;
+          this.playerListItem.songID = songID;
+          this.playerListItem.songer = songer;
+          fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+            method: "post",
+            body: JSON.stringify(this.playerListItem),
+            headers: {
+              "content-type": "application/json"
+            }
+          }).then(res => {
+            this.$refs.player.getPlayerList();
+          });
+          // 播放这首歌
+          console.log(this.$refs.player);
+          this.$refs.player.playTheSong(
+            this.playerList.length,
+            songID,
+            songImg
+          );
+          this.$store.commit("setIsPlay", true);
+        }
+      }
     },
     // 离开播放页面
     songItemFalse() {
@@ -350,87 +366,81 @@ export default {
     playerListFn(result, songName, songImg, songID, songer) {
       switch (result) {
         case "all":
-          console.log("添加所以歌曲");
+          console.log("添加所有歌曲");
+          for (const key in this.listObj) {
+            if (this.listObj.hasOwnProperty(key)) {
+              const element = this.listObj[key];
+              element.forEach(el => {
+                this.addPlayerLIst(el.name, el.al.picUrl, el.id, el.ar[0].name);
+              });
+            }
+          }
           break;
         case "one":
           console.log("添加一首歌曲");
-          if (this.playerList.length == 0) {
-            this.playerListItem.songName = songName;
-            this.playerListItem.songImg = songImg;
-            this.playerListItem.songID = songID;
-            this.playerListItem.songer = songer;
-            fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
-              method: "post",
-              body: JSON.stringify(this.playerListItem),
-              headers: {
-                "content-type": "application/json"
-              }
-            }).then(res => {
-              this.getPlayerList();
-            });
-            this.$store.commit("setAddedSuccessfully", true);
-            this.$store.commit("setIsMaskLayer", true);
-            // 告知动画结束
-            setTimeout(() => {
-              this.$store.commit("setAddedSuccessfully", false);
-              this.$store.commit("setIsMaskLayer", false);
-            }, 500);
-          } else {
-            var inspect = false;
-            this.playerList.forEach(element => {
-              if (element.songID == songID) {
-                console.log("这首歌已经在列表");
-              } else {
-                inspect = true;
-              }
-            });
-
-            if (inspect) {
-              this.playerListItem.songName = songName;
-              this.playerListItem.songImg = songImg;
-              this.playerListItem.songID = songID;
-              this.playerListItem.songer = songer;
-              fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
-                method: "post",
-                body: JSON.stringify(this.playerListItem),
-                headers: {
-                  "content-type": "application/json"
-                }
-              }).then(res => {
-                this.getPlayerList();
-              });
-              this.$store.commit("setAddedSuccessfully", true);
-              this.$store.commit("setIsMaskLayer", true);
-              // 告知动画结束
-              setTimeout(() => {
-                this.$store.commit("setAddedSuccessfully", false);
-                this.$store.commit("setIsMaskLayer", false);
-              }, 500);
-            }
-          }
-          console.log(this.playerList.length == 0);
+          this.addPlayerLIst(songName, songImg, songID, songer);
           break;
         default:
           break;
       }
     },
-    // 获取列表数据
-    getPlayerList() {
-      fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json")
-        .then(res => {
-          return res.json();
-        })
-        .then(data => {
-          var playList = [];
-          for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-              const element = data[key];
-              data[key].idx = key;
-              playList.push(element);
-            }
+    // 添加列表数据
+    addPlayerLIst(songName, songImg, songID, songer) {
+      console.log(this.playerList.length == 0);
+      if (this.playerList.length == 0) {
+        this.playerListItem.songName = songName;
+        this.playerListItem.songImg = songImg;
+        this.playerListItem.songID = songID;
+        this.playerListItem.songer = songer;
+        fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+          method: "post",
+          body: JSON.stringify(this.playerListItem),
+          headers: {
+            "content-type": "application/json"
           }
-          this.$store.commit("setPlayerList", playList);
+        }).then(res => {
+          this.$refs.player.getPlayerList();
         });
+        this.$store.commit("setAddedSuccessfully", true);
+        this.$store.commit("setIsMaskLayer", true);
+        // 告知动画结束
+        setTimeout(() => {
+          this.$store.commit("setAddedSuccessfully", false);
+          this.$store.commit("setIsMaskLayer", false);
+        }, 500);
+      } else {
+        var inspect = true;
+        this.playerList.forEach(element => {
+          if (element.songID == songID) {
+            console.log("这首歌已经在列表");
+            inspect = false;
+          }
+        });
+
+        if (inspect) {
+          console.log("没添加过");
+          this.playerListItem.songName = songName;
+          this.playerListItem.songImg = songImg;
+          this.playerListItem.songID = songID;
+          this.playerListItem.songer = songer;
+          fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+            method: "post",
+            body: JSON.stringify(this.playerListItem),
+            headers: {
+              "content-type": "application/json"
+            }
+          }).then(res => {
+            this.$refs.player.getPlayerList();
+          });
+          this.$store.commit("setAddedSuccessfully", true);
+          this.$store.commit("setIsMaskLayer", true);
+          // 告知动画结束
+          setTimeout(() => {
+            this.$store.commit("setAddedSuccessfully", false);
+            this.$store.commit("setIsMaskLayer", false);
+          }, 500);
+        }
+      }
     }
   },
   components: {
@@ -506,7 +516,7 @@ export default {
 
 .list {
   text-align: center;
-  height: 120px;
+  height: 130px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -591,6 +601,10 @@ export default {
 .listItem-center {
   width: 540px;
   overflow: hidden;
+}
+
+.listItem-center ul {
+  height: 660px;
 }
 
 .listItem-center ul li {
