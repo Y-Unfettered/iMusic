@@ -90,7 +90,9 @@
               <!-- 歌曲序列 歌曲名字 歌手 -->
               <div class="list-item" @click="playTheSong(index,item.songID,item.songImg)">
                 <span>{{index+1}}</span>
-                <span>{{item.songName}}-{{item.songer}}</span>
+                <div class="songNamePlayer">
+                  <span>{{item.songName}}-{{item.songer}}</span>
+                </div>
               </div>
               <!-- 正在播放时显示 -->
               <div class="music icon" :class="playicon == index ? 'active':'none'">
@@ -119,7 +121,7 @@ export default {
       // 播放器的默认配置
       audio: {
         // 播放的歌曲index
-        index:0,
+        index: 0,
         // 进度条百分比
         sliderTime: 0,
         // 实时播放时间
@@ -214,7 +216,7 @@ export default {
     },
     // 对进度条进行时间控制，自动滑动
     setValue(e) {
-      const value = ((e.clientX - 20) / 500) * 100;
+      const value = ((e.clientX - 20) / 340) * 100;
       if (value <= 0) {
         this.audio.sliderTime = 0;
       } else if (value >= 100) {
@@ -491,7 +493,7 @@ export default {
             "playerLrcRoll"
           )[0];
           var liList = document.getElementsByClassName("playerLrcRollLi");
-          playerLrcRoll.style.top = i * -60 + 60 + "px";
+          playerLrcRoll.style.top = i * -50 + 50 + "px";
           if (i >= 1) {
             liList[i - 1].classList.remove("Highlight");
           }
@@ -541,7 +543,7 @@ export default {
 }
 .player-header {
   width: 100%;
-  height: 60px;
+  height: 6vh;
   display: flex;
   align-items: center;
   margin-left: 20px;
@@ -549,7 +551,7 @@ export default {
 }
 .player-center {
   width: 100%;
-  height: 250px;
+  height: 25vh;
   background: #5c258d; /* fallback for old browsers */
   background: -webkit-linear-gradient(
     -45deg,
@@ -561,12 +563,13 @@ export default {
 }
 
 .player-center .player-img {
-  width: 300px;
-  height: 300px;
+  width: 200px;
+  height: 200px;
   position: absolute;
-  top: 90px;
+  top: 50%;
   left: 50%;
-  margin-left: -150px;
+  margin-left: -100px;
+  margin-top: -20px;
   background-color: #ccc;
   overflow: hidden;
   background-repeat: no-repeat;
@@ -578,41 +581,40 @@ export default {
 }
 
 .player-center .player-lrc {
-  width: 500px;
-  height: 200px;
+  width: 90%;
+  height: 150px;
   position: absolute;
-  top: 440px;
+  top: 180%;
   left: 50%;
-  margin-left: -250px;
+  margin-left: -45%;
   overflow: hidden;
 }
 
 .player-center .player-lrc .playerLrcRoll {
   width: 100%;
-  margin-top: 10px;
   position: absolute;
-  top: 60px;
+  top: 50px;
 }
 
 .player-center .player-lrc .playerLrcRoll li {
   width: 100%;
-  height: 60px;
+  height: 50px;
   text-align: center;
-  line-height: 60px;
+  line-height: 50px;
 }
 
 .player-footer {
   width: 100%;
-  height: 260px;
+  height: 25vh;
   position: fixed;
   bottom: 0;
 }
 
 .player-footer .speedOut {
-  width: 500px;
+  width: 340px;
   height: 4px;
   background-color: #ccc;
-  margin-top: 78px;
+  margin-top: 18px;
   margin-left: 20px;
   position: relative;
 }
@@ -638,7 +640,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 30px;
+  margin-top: 10px;
 }
 
 .player-footer .songTime span:nth-child(1) {
@@ -658,11 +660,11 @@ export default {
 }
 
 .player-footer .playiconbox .playorder {
-  margin-left: 40px;
+  margin-left: 20px;
 }
 
 .player-footer .playiconbox .playorder i {
-  font-size: 64px;
+  font-size: 24px;
 }
 
 .player-footer .playiconbox .prev {
@@ -670,20 +672,20 @@ export default {
 }
 
 .player-footer .playiconbox .prev i {
-  font-size: 64px;
+  font-size: 24px;
 }
 
 .player-footer .playiconbox .playing i {
-  font-size: 64px;
+  font-size: 24px;
 }
 
 .player-footer .playiconbox .next i {
-  font-size: 64px;
+  font-size: 24px;
 }
 
 .player-footer .playiconbox .playlist i {
-  font-size: 64px;
-  margin-right: 40px;
+  font-size: 24px;
+  margin-right: 20px;
 }
 .player-list-container {
   width: 100%;
@@ -693,11 +695,11 @@ export default {
 }
 .player-list-container .player-list-nav {
   width: 100%;
-  height: 60px;
+  height: 5vh;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 18px;
+  font-size: 14px;
   border-bottom: 1px solid #fff;
 }
 
@@ -709,7 +711,7 @@ export default {
 }
 .player-list {
   width: 100%;
-  height: 480px;
+  height: 50vh;
   position: fixed;
   bottom: 0;
   background: #5c258d; /* fallback for old browsers */
@@ -720,32 +722,42 @@ export default {
   ); /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(-45deg, #4389a2, #8f45cf);
   color: #fff;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .player-list ul {
-  height: 419px;
+  height: 45vh;
 }
 
 .player-list ul li {
   width: 100%;
-  height: 60px;
+  height: 5vh;
   display: flex;
   align-items: center;
   border-bottom: 1px solid #fff;
+  font-size: 14px;
 }
 .player-list ul li .list-item {
   flex: 2;
+  display: flex;
+  align-items: center;
 }
 .player-list ul li span:nth-child(1) {
   margin-left: 20px;
 }
-
-.player-list ul li span:nth-child(2) {
-  margin-left: 20px;
+.songNamePlayer {
+  width: 270px;
+  overflow: hidden;
+  display: inherit;
 }
+
+.songNamePlayer span {
+  margin-left: 20px;
+  white-space: nowrap;
+}
+
 .music {
-  width: 50px;
+  width: 22px;
   height: 20px;
   position: relative;
   overflow: hidden;
@@ -753,8 +765,8 @@ export default {
   align-items: center;
 }
 .music i {
-  width: 4px;
-  height: 5px;
+  width: 2px;
+  height: 4px;
   position: absolute;
   bottom: 0;
   background-color: #fff;
@@ -763,13 +775,13 @@ export default {
   left: 0;
 }
 .music i:nth-of-type(2) {
-  left: 8px;
+  left: 4px;
 }
 .music i:nth-of-type(3) {
-  left: 16px;
+  left: 8px;
 }
 .music i:nth-of-type(4) {
-  left: 24px;
+  left: 12px;
 }
 
 .music.icon i:nth-of-type(1) {
@@ -791,28 +803,28 @@ export default {
 
 @-webkit-keyframes wave {
   0% {
-    height: 8px;
+    height: 4px;
   }
   50% {
-    height: 32px;
+    height: 16px;
   }
   100% {
-    height: 12px;
+    height: 8px;
   }
 }
 @keyframes wave {
   0% {
-    height: 8px;
+    height: 4px;
   }
   50% {
-    height: 32px;
+    height: 16px;
   }
   100% {
-    height: 12px;
+    height: 8px;
   }
 }
 .player-list ul li i {
-  margin-right: 40px;
+  margin-right: 20px;
 }
 .active {
   display: block;

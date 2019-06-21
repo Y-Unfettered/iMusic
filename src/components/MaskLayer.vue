@@ -55,22 +55,17 @@ export default {
 }
 
 .mask .Popup {
-  width: 200px;
-  height: 100px;
+  width: 100px;
+  height: 60px;
   background-color: #ccc;
-  border-radius: 20px;
+  border-radius: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .loading {
   width: 60px;
-  height: 40px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  margin-top: -20px;
-  margin-left: -40px;
+  height: 20px;
   z-index: 999;
 }
 .loading span {
@@ -84,12 +79,11 @@ export default {
 @keyframes load {
   0%,
   100% {
-    height: 40px;
+    height: 16px;
     background: #4389a2;
   }
   50% {
-    height: 70px;
-    margin: -15px 0;
+    height: 13px;
     background: #8f45cf;
   }
 }

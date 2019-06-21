@@ -23,7 +23,6 @@
             <span>NO.{{index+1}}</span>
             {{songName.first}}-{{songName.second}}
           </p>
-          <span v-show="!item.tracks.length">{{item.name}}</span>
         </div>
         <div class="list-right">
           <i class="iconfont">&#xe733;</i>
@@ -479,15 +478,15 @@ export default {
 
 .motto {
   width: 100%;
-  height: 300px;
+  height: 20vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .motto .logo {
-  width: 200px;
-  height: 200px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -499,35 +498,31 @@ export default {
 
 .motto-p {
   width: 100%;
-  height: 40px;
+  height: 4vh;
   text-align: center;
-  font-size: 24px;
+  font-size: 14px;
   font-weight: bolder;
   color: #fff;
-  margin-top: -20px;
-  margin-bottom: 10px;
 }
 
 .home ul {
-  padding: 5px 0px;
-  height: 520px;
+  height: 71vh;
   overflow: hidden;
 }
 
 .list {
   text-align: center;
-  height: 130px;
+  height: 17vh;
   display: flex;
-  justify-content: space-between;
   align-items: center;
 }
 
 .list .list-left {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   overflow: hidden;
   border-radius: 20px;
-  margin-left: 40px;
+  margin-left: 10px;
 }
 
 .list .list-left img {
@@ -536,13 +531,13 @@ export default {
 }
 
 .list .list-center {
-  width: 300px;
+  width: 220px;
   text-align: left;
   margin-left: 20px;
 }
 
 .list .list-center p {
-  font-size: 18px;
+  font-size: 14px;
   margin-bottom: 10px;
   white-space: nowrap;
   overflow: hidden;
@@ -552,19 +547,19 @@ export default {
 }
 
 .list .list-center span {
-  font-size: 24px;
+  font-size: 14px;
   font-weight: bolder;
   white-space: nowrap;
   overflow: hidden;
 }
 
 .list .list-right {
-  width: 50px;
-  height: 50px;
+  width: 20px;
+  height: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 30px;
+  margin-left: 10px;
 }
 
 .listItem {
@@ -578,7 +573,7 @@ export default {
 
 .listItem .listItem-top {
   width: 100%;
-  height: 300px;
+  height: 29vh;
   overflow: hidden;
   background-repeat: no-repeat;
   background-position: center;
@@ -599,16 +594,16 @@ export default {
 }
 
 .listItem-center {
-  width: 540px;
+  width: 100%;
   overflow: hidden;
 }
 
 .listItem-center ul {
-  height: 660px;
+  height: 79vh;
 }
 
 .listItem-center ul li {
-  height: 100px;
+  height: 80px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -624,20 +619,19 @@ export default {
 }
 
 .listItem-center ul li .spanBox {
-  width: 100px;
-  height: 100px;
+  width: 60px;
+  height: 60px;
   float: left;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .listItem-center ul li .spanBoxs {
-  width: 280px;
-  height: 100px;
+  width: 200px;
   float: left;
   display: flex;
   align-items: center;
-  margin-left: 40px;
+  margin-left: 20px;
 }
 
 .listItem-center ul li .add {
@@ -647,12 +641,12 @@ export default {
 }
 
 .listItem-center ul li span {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bolder;
 }
 .listItem-center ul li .img {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   overflow: hidden;
   border-radius: 10px;
   display: inline-block;

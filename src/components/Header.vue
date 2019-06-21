@@ -35,15 +35,10 @@ export default {
   background: linear-gradient(-45deg, #4389a2, #8f45cf);
 }
 
-.container-bottom {
-  width: 100%;
-  margin-top: -1px;
-  overflow-y: auto;
-}
 
 .header {
   width: 100%;
-  height: 60px;
+  height: 5vh;
   display: flex;
   justify-content: space-between;
   align-items: center;
