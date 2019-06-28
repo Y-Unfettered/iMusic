@@ -1,8 +1,9 @@
 # iMusic Demo
-一个自己进行的简单设计，自己敲代码实现的简单音乐播放器，`不用于商业`，只是自己的一个学习实践
-在线演示地址：( https://y-unfettered.github.io/iMusicShow/)
+* 一个自己进行的简单设计，自己敲代码实现的简单音乐播放器，`不用于商业`，只是自己的一个学习实践
+* 在线演示地址：[iMusic](https://y-unfettered.github.io/iMusicShow/)，因为使用了`Google`的`firebase`，但由于是`Google`的服务，所以需要`科学上网`才能实现获取播放列表实现播放
+
 ## iMusic实现了哪些？
-* 数据的获取是根据大神提供的网易云API(https://github.com/Binaryify/NeteaseCloudMusicApi)获取的音乐数据
+* 数据的获取是根据大神提供的[网易云API](https://github.com/Binaryify/NeteaseCloudMusicApi)获取的音乐数据
 * 选取的是排行榜，对数据进行一个筛选，只选择了网易的四大榜单
     *   `飙升榜`
     *   `新歌榜`
