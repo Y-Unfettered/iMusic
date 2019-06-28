@@ -58,7 +58,7 @@
                 </div>
               </div>
 
-              <div class="add" @click="playerListFn('one',item.name,item.al.picUrl,item.id,)">
+              <div class="add" @click="playerListFn('one',item.name,item.al.picUrl,item.id,item.ar[0].name)">
                 <i class="iconfont" v-show="!Collection">&#xe669;</i>
               </div>
             </li>
@@ -305,7 +305,7 @@ export default {
         this.playerListItem.songImg = songImg;
         this.playerListItem.songID = songID;
         this.playerListItem.songer = songer;
-        fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+        fetch("https://imusic-4c411.firebaseio.com/MusicList.json", {
           method: "post",
           body: JSON.stringify(this.playerListItem),
           headers: {
@@ -315,7 +315,6 @@ export default {
           this.$refs.player.getPlayerList();
         });
         // 播放这首歌
-        console.log(this.$refs.player);
         this.$refs.player.playTheSong(0, element.songID, songImg);
         this.$store.commit("setIsPlay", true);
       } else {
@@ -337,7 +336,7 @@ export default {
           this.playerListItem.songImg = songImg;
           this.playerListItem.songID = songID;
           this.playerListItem.songer = songer;
-          fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+          fetch("https://imusic-4c411.firebaseio.com/MusicList.json", {
             method: "post",
             body: JSON.stringify(this.playerListItem),
             headers: {
@@ -391,7 +390,7 @@ export default {
         this.playerListItem.songImg = songImg;
         this.playerListItem.songID = songID;
         this.playerListItem.songer = songer;
-        fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+        fetch("https://imusic-4c411.firebaseio.com/MusicList.json", {
           method: "post",
           body: JSON.stringify(this.playerListItem),
           headers: {
@@ -422,7 +421,7 @@ export default {
           this.playerListItem.songImg = songImg;
           this.playerListItem.songID = songID;
           this.playerListItem.songer = songer;
-          fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json", {
+          fetch("https://imusic-4c411.firebaseio.com/MusicList.json", {
             method: "post",
             body: JSON.stringify(this.playerListItem),
             headers: {
@@ -635,7 +634,7 @@ export default {
 }
 
 .listItem-center ul li .add {
-  margin-right: 20px;
+  margin-right: 10px;
   color: #4389a2;
   font-size: 18px;
 }

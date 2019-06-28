@@ -260,7 +260,7 @@ export default {
     },
     // 获取列表数据
     getPlayerList() {
-      fetch("https://wd5641080783zkrsci.wilddogio.com/MusicList.json")
+      fetch("https://imusic-4c411.firebaseio.com/MusicList.json")
         .then(res => {
           return res.json();
         })
@@ -283,7 +283,7 @@ export default {
           console.log("清空所有列表");
           this.playerList.forEach(element => {
             fetch(
-              "https://wd5641080783zkrsci.wilddogio.com/MusicList/" +
+              "https://imusic-4c411.firebaseio.com/MusicList/" +
                 element.idx +
                 "/.json",
               {
@@ -302,7 +302,7 @@ export default {
         case "one":
           console.log("清空这条数据");
           fetch(
-            "https://wd5641080783zkrsci.wilddogio.com/MusicList/" +
+            "https://imusic-4c411.firebaseio.com/MusicList/" +
               item.idx +
               "/.json",
             {
@@ -614,8 +614,7 @@ export default {
   width: 340px;
   height: 4px;
   background-color: #ccc;
-  margin-top: 18px;
-  margin-left: 20px;
+  margin:10px auto;
   position: relative;
 }
 
@@ -731,7 +730,7 @@ export default {
 
 .player-list ul li {
   width: 100%;
-  height: 5vh;
+  height: 8vh;
   display: flex;
   align-items: center;
   border-bottom: 1px solid #fff;

@@ -102,18 +102,18 @@ export default {
 
 .Tips {
   font-weight: bolder;
-  font-size: 18px;
+  font-size: 14px;
   color: #fff;
 }
 
 .add {
   font-weight: bolder;
-  font-size: 18px;
+  font-size: 14px;
   color: #fff;
 }
 .noMore {
   font-weight: bolder;
-  font-size: 18px;
+  font-size: 14px;
   color: #fff;
 }
 </style>
